@@ -26,7 +26,7 @@ const sequelizeOptions = {
     idle: 10000 // tiempo máximo que una conexión puede estar inactiva (ms)
   },
   dialectOptions: {
-    connectTimeout: 20000 // 10 segundos
+    connectTimeout: 20000 // 20 segundos
   }
 }
 
