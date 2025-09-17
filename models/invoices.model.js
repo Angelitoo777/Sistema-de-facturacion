@@ -7,9 +7,6 @@ export const Invoices = sequelize.define('invoices', {
     primaryKey: true,
     defaultValue: DataTypes.UUIDV4
   },
-  client_id: {
-    type: DataTypes.UUID
-  },
   total: {
     type: DataTypes.DECIMAL(10, 2),
     allowNull: false
@@ -28,12 +25,6 @@ export const InvoicesDetails = sequelize.define('invoicesDetails', {
     type: DataTypes.UUID,
     primaryKey: true,
     defaultValue: DataTypes.UUIDV4
-  },
-  invoices_id: {
-    type: DataTypes.UUID
-  },
-  products_id: {
-    type: DataTypes.UUID
   },
   quantity: {
     type: DataTypes.NUMBER,
