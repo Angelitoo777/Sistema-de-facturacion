@@ -20,7 +20,7 @@ export const Products = sequelize.define('products', {
     allowNull: false
   },
   stock: {
-    type: DataTypes.NUMBER,
+    type: DataTypes.INTEGER,
     allowNull: false
   }
 })

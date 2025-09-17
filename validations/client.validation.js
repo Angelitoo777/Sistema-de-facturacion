@@ -10,3 +10,7 @@ const validateClient = z.object({
 export const validationClient = (data) => {
   return validateClient.safeParse(data)
 }
+
+export const validationPartialClient = (data) => {
+  return validateClient.partial().safeParse(data)
+}

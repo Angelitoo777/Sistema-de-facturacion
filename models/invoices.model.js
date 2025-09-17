@@ -27,7 +27,7 @@ export const InvoicesDetails = sequelize.define('invoicesDetails', {
     defaultValue: DataTypes.UUIDV4
   },
   quantity: {
-    type: DataTypes.NUMBER,
+    type: DataTypes.INTEGER,
     allowNull: false
   },
   price_unitary: {
@@ -35,6 +35,7 @@ export const InvoicesDetails = sequelize.define('invoicesDetails', {
     allowNull: false
   },
   subtotal: {
-    type: DataTypes.DECIMAL(10, 2)
+    type: DataTypes.DECIMAL(10, 2),
+    allowNull: false
   }
 })
