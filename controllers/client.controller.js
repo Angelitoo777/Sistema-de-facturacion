@@ -64,7 +64,7 @@ export class ClientController {
 
       const updatedClient = await Client.findByPk(id)
 
-      return res.status(200).json(updatedClient)
+      return res.status(200).json({ message: 'Cliente actualizado correctamente', updatedClient })
     } catch (error) {
       console.error(error)
       return res.status(500).json({ message: 'Error interno del servidor' })
