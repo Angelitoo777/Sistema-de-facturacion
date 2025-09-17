@@ -1,7 +1,7 @@
 // produccion
 import 'mysql2'
 import express from 'express'
-import { initializeSequelize } from '../config/mysql.database.js'
+import { sequelize } from '../config/mysql.database.js'
 import { routesOfClients } from '../routes/client.routes.js'
 
 const app = express()
@@ -15,7 +15,6 @@ app.get('/', (req, res) => {
 
 export default async (req, res) => {
   try {
-    const sequelize = await initializeSequelize()
     await sequelize.sync()
     app(req, res)
   } catch (error) {
