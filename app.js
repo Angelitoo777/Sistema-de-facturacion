@@ -1,7 +1,15 @@
 import express from 'express'
+import { sequelize } from './config/mysql.database.js'
+import { Client } from './models/client.model.js'
 
 const app = express()
 const PORT = process.env.PORT ?? 3000
+
+try {
+  await sequelize.sync({ force: true })
+} catch (error) {
+  console.error('Error connecting your database.', error)
+}
 
 app.use(express.json())
 
