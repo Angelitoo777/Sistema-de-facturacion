@@ -1,3 +1,4 @@
+import 'mysql2'
 import express from 'express'
 import { initializeSequelize } from '../config/mysql.database.js'
 import { routesOfClients } from '../routes/client.routes.js'
