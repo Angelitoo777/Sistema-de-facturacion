@@ -1,3 +1,4 @@
+// produccion
 import 'mysql2'
 import express from 'express'
 import { initializeSequelize } from '../config/mysql.database.js'
