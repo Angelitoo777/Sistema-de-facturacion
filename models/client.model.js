@@ -1,5 +1,7 @@
 import { DataTypes } from 'sequelize'
-import { sequelize } from '../config/mysql.database.js'
+import { initializeSequelize } from '../config/mysql.database.js'
+
+const sequelize = await initializeSequelize()
 
 export const Client = sequelize.define('clients', {
   id: {
