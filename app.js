@@ -3,6 +3,7 @@
 import express from 'express'
 import { sequelize } from './config/mysql.database.js'
 import { routesOfClients } from './routes/client.routes.js'
+import { routesOfProducts } from './routes/product.routes.js'
 
 const app = express()
 const PORT = process.env.PORT ?? 3000
@@ -17,6 +18,7 @@ try {
 app.use(express.json())
 
 app.use('/api', routesOfClients)
+app.use('/api', routesOfProducts)
 
 app.get('/', (req, res) => {
   res.send('Hola vercel')
