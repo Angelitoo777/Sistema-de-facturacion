@@ -14,7 +14,7 @@ export const sequelize = new Sequelize(DATABASE_NAME, DATABASE_USERNAME, DATABAS
   dialect: 'mysql',
   dialectOptions: {
     ssl: {
-      rejectUnauthorized: true
+      rejectUnauthorized: false
     }
   }
 })
