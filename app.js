@@ -1,13 +1,15 @@
+// desarrollo local
+
 import express from 'express'
-import { initializeSequelize } from './config/mysql.database.js'
+import { sequelize } from './config/mysql.database.js'
 import { routesOfClients } from './routes/client.routes.js'
 
 const app = express()
 const PORT = process.env.PORT ?? 3000
 
 try {
-  const sequelize = await initializeSequelize()
   await sequelize.sync({ force: true })
+  console.log('Database connected')
 } catch (error) {
   console.error('Error connecting your database.', error)
 }

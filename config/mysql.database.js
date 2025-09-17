@@ -12,69 +12,41 @@ const DATABASE_HOST = process.env.DATABASE_HOST
 const DATABASE_PORT = process.env.DATABASE_PORT
 const DB_CA_CERT = process.env.DB_CA_CERT
 
-// Función para escribir el certificado en un archivo temporal
-const writeCertToFile = async () => {
-  if (DB_CA_CERT) {
-    const certPath = path.join('/tmp', 'ca-cert.pem')
-    try {
-      console.log('Intentando escribir el certificado en:', certPath)
-      await fs.promises.writeFile(certPath, DB_CA_CERT)
-      console.log('Certificado escrito correctamente.')
-      return certPath
-    } catch (error) {
-      console.error('Error writing certificate file:', error)
-      return null // Retorna nulo si hay un error
-    }
+// Configuración síncrona para exportar sequelize y permitir autocompletado
+
+const sequelizeOptions = {
+  host: DATABASE_HOST,
+  port: DATABASE_PORT ? Number(DATABASE_PORT) : 3306,
+  dialect: 'mysql',
+  logging: false,
+  pool: {
+    max: 10, // máximo de conexiones simultáneas
+    min: 0,
+    acquire: 30000, // tiempo máximo para intentar conectar (ms)
+    idle: 10000 // tiempo máximo que una conexión puede estar inactiva (ms)
+  },
+  dialectOptions: {
+    connectTimeout: 20000 // 10 segundos
   }
-  console.log('No se encontró DB_CA_CERT en variables de entorno.')
-  return null
 }
 
-let sequelize = null
-
-// Función asíncrona para inicializar y conectar Sequelize
-const initializeSequelize = async () => {
-  if (sequelize) {
-    return sequelize
-  }
-
-  const certPath = await writeCertToFile()
-
-  const sequelizeOptions = {
-    host: DATABASE_HOST,
-    port: DATABASE_PORT ? Number(DATABASE_PORT) : 3306,
-    dialect: 'mysql',
-    logging: false // Para no mostrar los logs SQL en la consola
-  }
-
-  if (certPath) {
-    try {
-      const caContent = fs.readFileSync(certPath, 'utf8')
-      console.log('Contenido del certificado CA (primeros 100 chars):', caContent.substring(0, 100))
-      sequelizeOptions.dialectOptions = {
-        ssl: {
-          ca: caContent,
-          rejectUnauthorized: false // Cambia a false si tu proveedor lo requiere
-        }
-      }
-    } catch (err) {
-      console.error('Error leyendo el archivo de certificado:', err)
-    }
-  } else {
-    console.log('No se usará SSL para la conexión MySQL.')
-  }
-
-  sequelize = new Sequelize(DATABASE_NAME, DATABASE_USERNAME, DATABASE_PASSWORD, sequelizeOptions)
-
+if (DB_CA_CERT) {
+  const certPath = path.join('/tmp', 'ca-cert.pem')
   try {
-    await sequelize.authenticate()
-    console.log('Connection to the database has been established successfully.')
-  } catch (error) {
-    console.error('Unable to connect to the database:', error)
-    throw error
+    fs.writeFileSync(certPath, DB_CA_CERT)
+    const caContent = fs.readFileSync(certPath, 'utf8')
+    sequelizeOptions.dialectOptions.ssl = {
+      ca: caContent,
+      rejectUnauthorized: false
+    }
+  } catch (err) {
+    console.error('Error manejando el certificado SSL:', err)
   }
-
-  return sequelize
 }
 
-export { initializeSequelize }
+export const sequelize = new Sequelize(
+  DATABASE_NAME,
+  DATABASE_USERNAME,
+  DATABASE_PASSWORD,
+  sequelizeOptions
+)
