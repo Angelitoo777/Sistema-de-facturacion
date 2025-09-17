@@ -4,3 +4,5 @@ import { ClientController } from '../controllers/client.controller.js'
 export const routesOfClients = Router()
 
 routesOfClients.get('/clients', ClientController.getAll)
+
+routesOfClients.post('/clients', ClientController.createClient)
