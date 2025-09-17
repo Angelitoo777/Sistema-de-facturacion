@@ -4,9 +4,11 @@ import express from 'express'
 import { sequelize } from '../config/mysql.database.js'
 import { routesOfClients } from '../routes/client.routes.js'
 import { routesOfProducts } from '../routes/product.routes.js'
+import { corsMiddleware } from '../middlewares/cors.middleware.js'
 
 const app = express()
 
+app.use(corsMiddleware)
 app.use(express.json())
 app.use('/api', routesOfClients)
 app.use('/api', routesOfProducts)
