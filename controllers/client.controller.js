@@ -1,10 +1,21 @@
 import { Client } from '../models/associations.js'
 import { validationClient, validationPartialClient } from '../validations/client.validation.js'
+import { redisDB } from '../config/redis.database.js'
+
+const redisClient = await redisDB()
 
 export class ClientController {
   static async getAll (req, res) {
     try {
+      const cacheClients = await redisClient.get('clients')
+
+      if (cacheClients) {
+        return res.status(200).json(JSON.parse(cacheClients))
+      }
+
       const getClients = await Client.findAll()
+
+      await redisClient.setex('clients', 3600, JSON.stringify(getClients))
 
       return res.status(200).json(getClients)
     } catch (error) {
@@ -17,11 +28,19 @@ export class ClientController {
     const { id } = req.params
 
     try {
+      const cacheId = await redisClient.get(`client:${id}`)
+
+      if (cacheId) {
+        return res.status(200).json(JSON.parse(cacheId))
+      }
+
       const findById = await Client.findByPk(id)
 
       if (!findById) {
         return res.status(404).json({ message: 'Cliente no encontrado' })
       }
+
+      await redisClient.setex(`client:${id}`, 3600, JSON.stringify(findById))
 
       return res.status(200).json(findById)
     } catch (error) {
@@ -40,6 +59,9 @@ export class ClientController {
 
     try {
       const newClient = await Client.create({ name, email, phone, address })
+
+      await redisClient.del('clients')
+
       return res.status(201).json(newClient)
     } catch (error) {
       console.error(error)
@@ -64,6 +86,8 @@ export class ClientController {
 
       const updatedClient = await Client.findByPk(id)
 
+      await redisClient.del('clients')
+
       return res.status(200).json({ message: 'Cliente actualizado correctamente', updatedClient })
     } catch (error) {
       console.error(error)
@@ -82,6 +106,8 @@ export class ClientController {
       }
 
       await Client.destroy({ where: { id } })
+
+      await redisClient.del('clients')
 
       return res.status(200).json({ message: 'Cliente eliminado exitosamente' })
     } catch (error) {
