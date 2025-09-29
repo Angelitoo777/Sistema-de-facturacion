@@ -6,6 +6,7 @@ import { routesOfClients } from '../routes/client.routes.js'
 import { routesOfProducts } from '../routes/product.routes.js'
 import { routesOfInvoices } from '../routes/invoice.routes.js'
 import { corsMiddleware } from '../middlewares/cors.middleware.js'
+import { redisDB } from '../config/redis.database.js'
 
 const app = express()
 
@@ -22,6 +23,7 @@ app.get('/', (req, res) => {
 export default async (req, res) => {
   try {
     await sequelize.sync()
+    await redisDB()
     app(req, res)
   } catch (error) {
     console.error('Error connecting your database.', error)

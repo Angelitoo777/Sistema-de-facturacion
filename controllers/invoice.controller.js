@@ -3,10 +3,19 @@ import { sequelize } from '../config/mysql.database.js'
 import { Invoices, InvoicesDetails, Products, Client } from '../models/associations.js'
 import { validationInvoice } from '../validations/invoice.validation.js'
 import { createPDF } from '../services/pdfInvoice.services.js'
+import { redisDB } from '../config/redis.database.js'
+
+const redisClient = await redisDB()
 
 export class InvoiceController {
   static async getAll (req, res) {
     try {
+      const cacheInvoice = await redisClient.get('invoices')
+
+      if (cacheInvoice) {
+        return res.status(200).json(JSON.parse(cacheInvoice))
+      }
+
       const findAll = await Invoices.findAll({
         include: [
           { model: Client, as: 'client' },
@@ -17,6 +26,9 @@ export class InvoiceController {
           }
         ]
       })
+
+      await redisClient.setex('invoice', 3600, JSON.stringify(findAll))
+
       return res.status(200).json(findAll)
     } catch (error) {
       console.error(error)
@@ -28,6 +40,12 @@ export class InvoiceController {
     const { id } = req.params
 
     try {
+      const cacheId = await redisClient.get(`invoice:${id}`)
+
+      if (cacheId) {
+        return res.status(200).json(JSON.parse(cacheId))
+      }
+
       const findById = await Invoices.findByPk(id, {
         include: [
           { model: Client, as: 'client' },
@@ -42,6 +60,8 @@ export class InvoiceController {
       if (!findById) {
         return res.status(404).json({ message: 'Factura no encontrada' })
       }
+
+      await redisClient.setex(`invoice:${id}`, 3600, JSON.stringify(findById))
 
       return res.status(200).json(findById)
     } catch (error) {
@@ -77,6 +97,8 @@ export class InvoiceController {
 
         return newInvoice
       })
+
+      await redisClient.del('invoices')
 
       return res.status(201).json({ message: 'Factura creada exitosamente' }, transactionInvoice.newInvoice)
     } catch (error) {

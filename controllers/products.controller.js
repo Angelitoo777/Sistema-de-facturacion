@@ -1,10 +1,21 @@
 import { validationProduct, validationPartialProduct } from '../validations/product.validation.js'
 import { Products } from '../models/associations.js'
+import { redisDB } from '../config/redis.database.js'
+
+const redisClient = await redisDB()
 
 export class ProductController {
   static async getAll (req, res) {
     try {
+      const cacheProducts = await redisClient.get('products')
+
+      if (cacheProducts) {
+        return res.status(200).json(JSON.parse(cacheProducts))
+      }
+
       const findProducts = await Products.findAll()
+
+      await redisClient.setex('products', 3600, JSON.stringify(findProducts))
 
       return res.status(200).json(findProducts)
     } catch (error) {
@@ -16,11 +27,19 @@ export class ProductController {
   static async getById (req, res) {
     const { id } = req.params
     try {
+      const cacheId = await redisClient.get(`products:${id}`)
+
+      if (cacheId) {
+        return res.status(200).json(JSON.parse(cacheId))
+      }
+
       const findProductById = await Products.findByPk(id)
 
       if (!findProductById) {
         return res.status(404).json({ message: 'Producto no encontrado' })
       }
+
+      await redisClient.setex(`products:${id}`, 3600, JSON.stringify(findProductById))
 
       return res.status(200).json(findProductById)
     } catch (error) {
@@ -39,6 +58,8 @@ export class ProductController {
 
     try {
       const newProduct = await Products.create({ name, description, price, stock })
+
+      await redisClient.del('products')
 
       return res.status(201).json(newProduct)
     } catch (error) {
@@ -65,6 +86,8 @@ export class ProductController {
 
       const productUpdated = await Products.findByPk(id)
 
+      await redisClient.del('products')
+
       return res.status(200).json({ message: 'Producto actualizado correctamente', productUpdated })
     } catch (error) {
       console.error(error)
@@ -83,6 +106,8 @@ export class ProductController {
       }
 
       await Products.destroy({ where: { id } })
+
+      await redisClient.del('products')
 
       return res.status(200).json({ message: 'Producto eliminado exitosamente' })
     } catch (error) {
