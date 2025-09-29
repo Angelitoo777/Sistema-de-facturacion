@@ -7,6 +7,7 @@ import { routesOfProducts } from './routes/product.routes.js'
 import { routesOfInvoices } from './routes/invoice.routes.js'
 import { corsMiddleware } from './middlewares/cors.middleware.js'
 import { redisDB } from './config/redis.database.js'
+import { routesOfCronJob } from './routes/cronJob.routes.js'
 
 const app = express()
 const PORT = process.env.PORT ?? 3000
@@ -26,6 +27,7 @@ app.use(corsMiddleware)
 app.use('/api', routesOfClients)
 app.use('/api', routesOfProducts)
 app.use('/api', routesOfInvoices)
+app.use('/api', routesOfCronJob)
 
 app.get('/', (req, res) => {
   res.send('Hola vercel')
